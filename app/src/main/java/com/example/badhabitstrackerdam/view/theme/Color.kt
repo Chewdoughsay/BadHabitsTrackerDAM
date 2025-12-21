@@ -1,4 +1,4 @@
-package com.example.badhabitstrackerdam.ui.theme
+package com.example.badhabitstrackerdam.view.theme
 
 import androidx.compose.ui.graphics.Color
 

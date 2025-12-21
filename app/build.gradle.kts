@@ -1,19 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.hilt.android) // Plugin Hilt
-    alias(libs.plugins.ksp)          // Plugin KSP (înlocuitor KAPT)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization) // Pentru navigare cu argumente type-safe
     alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace = "com.example.badhabitstrackerdam" // Schimbă cu pachetul tău real
+    namespace = "com.example.badhabitstrackerdam"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.badhabitstrackerdam"
-        minSdk = 26 // Android 8.0 (recomandat pentru Room și funcții moderne)
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -44,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1" // Doar dacă folosești versiuni vechi de Kotlin, la 2.0.0 nu mai e nevoie
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {

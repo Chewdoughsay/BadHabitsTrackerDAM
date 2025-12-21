@@ -1,6 +1,5 @@
-package com.example.badhabitstrackerdam.ui.theme
+package com.example.badhabitstrackerdam.view.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

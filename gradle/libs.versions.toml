@@ -1,7 +1,7 @@
 [versions]
 # Core & Kotlin
-agp = "8.13.2" # Android Gradle Plugin - Verifică compatibilitatea cu Android Studio-ul tău
-kotlin = "2.0.0" # Kotlin modern
+agp = "8.13.2" # Android Gradle Plugin
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
@@ -16,7 +16,7 @@ hilt = "2.51.1"
 
 # Room (Database)
 room = "2.6.1"
-ksp = "2.0.0-1.0.22" # Trebuie să fie compatibil cu versiunea de Kotlin
+ksp = "2.0.0-1.0.22"
 
 # Networking (Retrofit)
 retrofit = "2.11.0"
