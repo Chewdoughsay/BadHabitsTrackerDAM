@@ -1,4 +1,7 @@
 package com.example.badhabitstrackerdam
 
-class BadHabitsApp {
-}
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class BadHabitsApp : Application()
