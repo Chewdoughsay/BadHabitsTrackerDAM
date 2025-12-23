@@ -43,16 +43,22 @@ fun AppNavigation() {
 
         // --- RUTA 3: DETAIL (cu argument) ---
         composable(
-            route = AppRoutes.HABIT_DETAIL_ROUTE, // "habit_detail/{habitId}"
+            route = AppRoutes.HABIT_DETAIL_ROUTE,
             arguments = listOf(
                 navArgument(AppRoutes.HABIT_ID_ARG) { type = NavType.IntType }
             )
         ) { backStackEntry ->
-            // Extragem argumentul din Bundle
             val habitId = backStackEntry.arguments?.getInt(AppRoutes.HABIT_ID_ARG) ?: -1
 
-            // Îl pasăm ecranului
-            HabitDetailScreen(habitId = habitId)
+            HabitDetailScreen(
+                habitId = habitId,
+                onBack = { navController.popBackStack() }, // Acum butonul Back funcționează
+                onSave = { title, desc, days ->
+                    // Momentan doar printăm în consolă și ne întoarcem
+                    println("SAVE: $title, $desc, $days")
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
