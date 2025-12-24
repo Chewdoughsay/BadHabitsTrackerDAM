@@ -38,4 +38,19 @@ object AppModule {
     // NOTĂ: Nu trebuie să facem @Provides pentru Repository,
     // deoarece am folosit @Inject constructor în clasa HabitRepository.
     // Hilt îl detectează automat!
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(): retrofit2.Retrofit {
+        return retrofit2.Retrofit.Builder()
+            .baseUrl("https://zenquotes.io/")
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideZenQuotesApi(retrofit: retrofit2.Retrofit): com.example.badhabitstrackerdam.model.remote.ZenQuotesApi {
+        return retrofit.create(com.example.badhabitstrackerdam.model.remote.ZenQuotesApi::class.java)
+    }
 }
