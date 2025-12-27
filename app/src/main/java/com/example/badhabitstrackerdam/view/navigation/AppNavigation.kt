@@ -53,11 +53,6 @@ fun AppNavigation() {
             HabitDetailScreen(
                 habitId = habitId,
                 onBack = { navController.popBackStack() }, // Acum butonul Back funcționează
-                onSave = { title, desc, days ->
-                    // Momentan doar printăm în consolă și ne întoarcem
-                    println("SAVE: $title, $desc, $days")
-                    navController.popBackStack()
-                }
             )
         }
     }

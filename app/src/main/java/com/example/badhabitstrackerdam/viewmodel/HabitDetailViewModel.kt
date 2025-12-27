@@ -77,6 +77,19 @@ class HabitDetailViewModel @Inject constructor(
             onSaveSuccess()
         }
     }
+
+    // Funcția de ștergere
+    fun deleteHabit(onDeleteSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (habitId != -1) {
+                val habit = repository.getHabitById(habitId)
+                if (habit != null) {
+                    repository.deleteHabit(habit)
+                    onDeleteSuccess() // Navigăm înapoi după ștergere
+                }
+            }
+        }
+    }
 }
 
 // O clasă simplă care ține starea formularului

@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -16,24 +18,23 @@ import com.example.badhabitstrackerdam.viewmodel.HabitDetailViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(
-    habitId: Int, // Păstrăm parametrul doar pentru titlul UI, logica e în VM
+    habitId: Int,
     onBack: () -> Unit,
-    onSave: (String, String, Int) -> Unit, // Nu îl mai folosim direct, dar îl lăsăm pt compatibilitate momentan sau îl putem șterge
-    // Injectăm ViewModel-ul
     viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isEditing = habitId != -1
 
-    // State-uri locale pentru editare text
+    // Controller pentru tastatură
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // State-uri locale
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var goalDaysText by remember { mutableStateOf("") }
 
-    // Un flag ca să știm dacă am încărcat deja datele inițiale
+    // Încărcare date inițiale
     var isDataLoaded by remember { mutableStateOf(false) }
-
-    // Când vine starea din DB (la Editare), populăm câmpurile o singură dată
     LaunchedEffect(uiState) {
         if (!isDataLoaded && (uiState.title.isNotEmpty() || isEditing)) {
             title = uiState.title
@@ -43,6 +44,35 @@ fun HabitDetailScreen(
         }
     }
 
+    // Dialog de confirmare ștergere (Opțional, pentru UX mai bun)
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Habit?") },
+            text = { Text("Are you sure you want to remove this habit? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteHabit {
+                            showDeleteDialog = false
+                            onBack()
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,6 +80,18 @@ fun HabitDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    // Butonul DELETE apare doar dacă edităm un habit existent
+                    if (isEditing) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Habit",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -65,17 +107,18 @@ fun HabitDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Titlu
+            // 1. Titlu
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Habit Title") },
+                label = { Text("Habit Title *") }, // Marcăm ca obligatoriu
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                isError = title.isEmpty(), // Feedback vizual roșu dacă e gol
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
             )
 
-            // Descriere
+            // 2. Descriere
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -84,30 +127,30 @@ fun HabitDetailScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
             )
 
-            // Zile
+            // 3. Zile
             OutlinedTextField(
                 value = goalDaysText,
                 onValueChange = { if (it.all { c -> c.isDigit() }) goalDaysText = it },
-                label = { Text("Goal Days") },
+                label = { Text("Goal Days *") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Buton Save conectat la ViewModel
+            // 4. Buton Save
             Button(
                 onClick = {
+                    // Ascundem tastatura
+                    keyboardController?.hide()
+
                     val days = goalDaysText.toIntOrNull() ?: 0
-                    if (title.isNotEmpty() && days > 0) {
-                        // Apelăm funcția din ViewModel
-                        viewModel.saveHabit(title, description, days) {
-                            // Callback: Când s-a terminat salvarea, navigăm înapoi
-                            onBack()
-                        }
+                    viewModel.saveHabit(title, description, days) {
+                        onBack()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
+                // VALIDARE: Buton inactiv dacă titlul sau zilele lipsesc
                 enabled = title.isNotEmpty() && goalDaysText.isNotEmpty()
             ) {
                 Text(text = "Save Habit")
