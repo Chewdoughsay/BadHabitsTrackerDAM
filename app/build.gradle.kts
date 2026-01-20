@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.serialization) // Pentru navigare cu argumente type-safe
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -71,19 +71,22 @@ dependencies {
 
     // Hilt - Dependency Injection
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler) // Folosim KSP
-    implementation(libs.androidx.hilt.navigation.compose) // Integrare Hilt cu Nav Compose
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Room - Local Database
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx) // Suport Coroutines/Flow
-    ksp(libs.androidx.room.compiler) // Folosim KSP
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Retrofit - Networking
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    // WorkManager - Background Tasks
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Testing
     testImplementation(libs.junit)

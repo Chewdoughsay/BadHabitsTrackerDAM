@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.badhabitstrackerdam.viewmodel.DashboardViewModel
-import com.example.badhabitstrackerdam.viewmodel.QuoteState // Importăm starea
+import com.example.badhabitstrackerdam.viewmodel.QuoteState
 import com.example.badhabitstrackerdam.view.screens.components.HabitItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,8 +26,8 @@ fun DashboardScreen(
     onNavigateToDetail: (Int) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
-    val habits by viewModel.habits.collectAsState()
-    val quoteState by viewModel.quoteState.collectAsState() // Ascultăm starea citatului
+    val habitsWithProgress by viewModel.habitsWithProgress.collectAsState()
+    val quoteState by viewModel.quoteState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -56,7 +56,7 @@ fun DashboardScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 100.dp), // Înălțime minimă ca să nu "sară" UI-ul
+                    .heightIn(min = 100.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
             ) {
                 Box(
@@ -67,7 +67,6 @@ fun DashboardScreen(
                 ) {
                     when (val state = quoteState) {
                         is QuoteState.Loading -> {
-                            // Feedback vizual pentru încărcare
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -90,7 +89,6 @@ fun DashboardScreen(
                             }
                         }
                         is QuoteState.Error -> {
-                            // Feedback vizual pentru eroare (Fallback)
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.Warning, contentDescription = "Error")
                                 Text(
@@ -103,7 +101,6 @@ fun DashboardScreen(
                     }
                 }
             }
-            // --- FINAL SECTIUNE CITAT ---
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -111,7 +108,7 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (habits.isEmpty()) {
+            if (habitsWithProgress.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No habits yet. Add one!", color = MaterialTheme.colorScheme.secondary)
                 }
@@ -119,12 +116,21 @@ fun DashboardScreen(
                 LazyColumn(
                     contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    items(habits) { habit ->
+                    items(habitsWithProgress) { habitWithProgress ->
                         HabitItem(
-                            title = habit.title,
-                            daysGoal = habit.goalDays,
-                            currentProgress = 0.1f,
-                            onClick = { onNavigateToDetail(habit.id) }
+                            title = habitWithProgress.habit.title,
+                            daysGoal = habitWithProgress.habit.goalDays,
+                            currentProgress = habitWithProgress.progressPercentage,
+                            progressText = habitWithProgress.progressText,
+                            hasCheckedInToday = habitWithProgress.hasCheckedInToday,
+                            onCheckIn = {
+                                if (habitWithProgress.hasCheckedInToday) {
+                                    viewModel.undoCheckIn(habitWithProgress.habit.id)
+                                } else {
+                                    viewModel.checkInHabit(habitWithProgress.habit.id)
+                                }
+                            },
+                            onClick = { onNavigateToDetail(habitWithProgress.habit.id) }
                         )
                     }
                 }

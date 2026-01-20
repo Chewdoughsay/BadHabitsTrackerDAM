@@ -1,6 +1,6 @@
 [versions]
 # Core & Kotlin
-agp = "8.13.2" # Android Gradle Plugin
+agp = "8.13.2"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.4"
@@ -9,7 +9,7 @@ composeBom = "2024.06.00"
 
 # Navigation
 navigationCompose = "2.8.0"
-kotlinSerialization = "1.7.1" # Necesar pentru Type-Safe Navigation (argumente)
+kotlinSerialization = "1.7.1"
 
 # Hilt (Dependency Injection)
 hilt = "2.51.1"
@@ -22,6 +22,9 @@ ksp = "2.0.0-1.0.22"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 gson = "2.10.1"
+
+# WorkManager (Background Tasks)
+workManager = "2.9.0"
 
 # Testing
 junit = "4.13.2"
@@ -62,6 +65,9 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+
+# WorkManager
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
