@@ -15,18 +15,15 @@ import javax.inject.Inject
 @HiltViewModel
 class HabitDetailViewModel @Inject constructor(
     private val repository: HabitRepository,
-    savedStateHandle: SavedStateHandle // Prinde automat argumentele din Navigație
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // Extragem ID-ul din argumentele rutei
     private val habitId: Int = savedStateHandle[AppRoutes.HABIT_ID_ARG] ?: -1
 
-    // State pentru câmpurile din UI (îl vom observa în Ecran)
     private val _uiState = MutableStateFlow(HabitUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Dacă avem un ID valid (nu e -1), înseamnă că EDITĂM. Încărcăm datele.
         if (habitId != -1) {
             loadHabit()
         }
@@ -36,7 +33,6 @@ class HabitDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val habit = repository.getHabitById(habitId)
             habit?.let {
-                // Actualizăm starea UI-ului cu datele din DB
                 _uiState.value = HabitUiState(
                     title = it.title,
                     description = it.description,
@@ -52,47 +48,44 @@ class HabitDetailViewModel @Inject constructor(
             val currentTime = System.currentTimeMillis()
 
             if (habitId == -1) {
-                // --- CREATE NEW ---
+                // CREATE NEW
                 val newHabit = HabitEntity(
                     title = title,
                     description = description,
                     goalDays = goalDays,
                     startTimestamp = currentTime
                 )
+                // insertHabit now returns Long, but we don't need the ID here
                 repository.insertHabit(newHabit)
             } else {
-                // --- UPDATE EXISTING ---
-                // Trebuie să păstrăm data începerii originală!
+                // UPDATE EXISTING
                 val existingHabit = repository.getHabitById(habitId)
                 val updatedHabit = existingHabit?.copy(
                     title = title,
                     description = description,
                     goalDays = goalDays
-                ) ?: return@launch // Safety check
+                ) ?: return@launch
 
                 repository.updateHabit(updatedHabit)
             }
 
-            // Anunțăm UI-ul că am terminat (pentru a naviga înapoi)
             onSaveSuccess()
         }
     }
 
-    // Funcția de ștergere
     fun deleteHabit(onDeleteSuccess: () -> Unit) {
         viewModelScope.launch {
             if (habitId != -1) {
                 val habit = repository.getHabitById(habitId)
                 if (habit != null) {
                     repository.deleteHabit(habit)
-                    onDeleteSuccess() // Navigăm înapoi după ștergere
+                    onDeleteSuccess()
                 }
             }
         }
     }
 }
 
-// O clasă simplă care ține starea formularului
 data class HabitUiState(
     val title: String = "",
     val description: String = "",

@@ -8,12 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.badhabitstrackerdam.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
+    val isPopulatingData by viewModel.isPopulatingData.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -23,7 +27,6 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo / Icon
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = "Logo",
@@ -41,7 +44,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Câmp Nume
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -52,14 +54,46 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Buton Start
             Button(
                 onClick = onLoginSuccess,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                enabled = name.isNotEmpty() // Activ doar daca s-a scris ceva
+                enabled = name.isNotEmpty() && !isPopulatingData
             ) {
                 Text(text = "Start Journey")
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // TEST DATA BUTTON (Remove this in production!)
+            OutlinedButton(
+                onClick = {
+                    viewModel.populateTestData {
+                        // After populating, navigate to dashboard
+                        onLoginSuccess()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = !isPopulatingData
+            ) {
+                if (isPopulatingData) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Populating...")
+                } else {
+                    Text("🧪 Populate Test Data")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Create 5 sample habits with random check-ins",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
         }
     }
 }

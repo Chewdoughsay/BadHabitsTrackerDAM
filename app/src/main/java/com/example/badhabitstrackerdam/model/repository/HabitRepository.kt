@@ -20,7 +20,8 @@ class HabitRepository @Inject constructor(
 
     suspend fun getHabitById(id: Int): HabitEntity? = habitDao.getHabitById(id)
 
-    suspend fun insertHabit(habit: HabitEntity) = habitDao.insertHabit(habit)
+    // Returns the ID of the inserted habit
+    suspend fun insertHabit(habit: HabitEntity): Long = habitDao.insertHabit(habit)
 
     suspend fun updateHabit(habit: HabitEntity) = habitDao.updateHabit(habit)
 
@@ -38,7 +39,6 @@ class HabitRepository @Inject constructor(
             )
             checkInDao.insertCheckIn(checkIn)
         }
-        // Dacă există deja, nu facem nimic (prevent spam)
     }
 
     suspend fun hasCheckInToday(habitId: Int): Boolean {
@@ -48,7 +48,6 @@ class HabitRepository @Inject constructor(
 
     suspend fun deleteCheckInToday(habitId: Int) {
         val (dayStart, dayEnd) = getTodayBounds()
-        // Folosim metoda nouă care șterge doar 1 check-in, nu toate
         checkInDao.deleteOneCheckInToday(habitId, dayStart, dayEnd)
     }
 
@@ -57,12 +56,15 @@ class HabitRepository @Inject constructor(
     }
 
     suspend fun getCheckInCount(habitId: Int): Int {
-        // Folosim count de zile unice în loc de count total
-        // Astfel, chiar dacă există duplicate (din bug-uri vechi), numără corect
         return checkInDao.getUniqueDaysCheckInCount(habitId)
     }
 
-    // --- Cleanup Methods (opțional, pentru curățarea duplicate-urilor vechi) ---
+    // --- Direct Insert (for test data only) ---
+    suspend fun insertCheckInDirect(checkIn: CheckInEntity) {
+        checkInDao.insertCheckIn(checkIn)
+    }
+
+    // --- Cleanup Methods ---
     suspend fun cleanupDuplicates(habitId: Int) {
         checkInDao.cleanupDuplicateCheckIns(habitId)
     }
