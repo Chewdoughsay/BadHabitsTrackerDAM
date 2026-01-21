@@ -27,10 +27,14 @@ class DashboardViewModel @Inject constructor(
     // Trigger pentru refresh când se face check-in
     private val _refreshTrigger = MutableStateFlow(0)
 
+    // Flow pentru vizibilitatea citatului (toggle cu shake)
+    // ⭐ SCHIMBAT: false by default - "Kinder Surprise" style!
+    private val _isQuoteVisible = MutableStateFlow(false)
+    val isQuoteVisible = _isQuoteVisible.asStateFlow()
+
     // Flow pentru Lista de Obiceiuri cu Progres
     val habitsWithProgress: StateFlow<List<HabitWithProgress>> = repository.getAllHabits()
         .combine(_refreshTrigger) { habits, _ ->
-            // Pentru fiecare habit, calculăm progresul
             habits.map { habit ->
                 val checkInCount = repository.getCheckInCount(habit.id)
                 val hasCheckedToday = repository.hasCheckInToday(habit.id)
@@ -60,7 +64,7 @@ class DashboardViewModel @Inject constructor(
 
     init {
         fetchDailyQuote()
-        cleanupDuplicates() // Curăță duplicate-urile la pornire (one-time)
+        cleanupDuplicates()
     }
 
     private fun fetchDailyQuote() {
@@ -80,16 +84,13 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    // Curăță duplicate-urile vechi la pornirea aplicației
     private fun cleanupDuplicates() {
         viewModelScope.launch {
             try {
                 repository.cleanupAllDuplicates()
-                // Trigger refresh după cleanup
                 _refreshTrigger.value += 1
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Ignorăm erorile de cleanup - nu e critic
             }
         }
     }
@@ -98,7 +99,6 @@ class DashboardViewModel @Inject constructor(
     fun checkInHabit(habitId: Int) {
         viewModelScope.launch {
             repository.checkInToday(habitId)
-            // Trigger refresh pentru UI
             _refreshTrigger.value += 1
         }
     }
@@ -107,8 +107,12 @@ class DashboardViewModel @Inject constructor(
     fun undoCheckIn(habitId: Int) {
         viewModelScope.launch {
             repository.deleteCheckInToday(habitId)
-            // Trigger refresh pentru UI
             _refreshTrigger.value += 1
         }
+    }
+
+    // 📳 SHAKE FEATURE - Toggle quote visibility
+    fun toggleQuoteVisibility() {
+        _isQuoteVisible.value = !_isQuoteVisible.value
     }
 }
